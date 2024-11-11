@@ -5,9 +5,9 @@
 #define PIN_LED   9
 #define PIN_SERVO 10
 
-#define _DUTY_MIN 1000     // servo full clock-wise position (0 degree)
+#define _DUTY_MIN 500     // servo full clock-wise position (0 degree)
 #define _DUTY_NEU 1500     // servo neutral position (90 degree)
-#define _DUTY_MAX 2000     // servo full counter-clockwise position (180 degree)
+#define _DUTY_MAX 2500     // servo full counter-clockwise position (180 degree)
 
 #define _DIST_MIN  100.0   // minimum distance 100mm
 #define _DIST_MAX  250.0   // maximum distance 250mm
@@ -46,9 +46,9 @@ void loop() {
 
   // Apply range filter (only process if in range)
   if (dist_raw >= _DIST_MIN && dist_raw <= _DIST_MAX) {
-    digitalWrite(PIN_LED, HIGH);  // Turn on LED if within range
+    digitalWrite(PIN_LED, LOW);  // Turn on LED if within range
   } else {
-    digitalWrite(PIN_LED, LOW);   // Turn off LED if out of range
+    digitalWrite(PIN_LED, HIGH);   // Turn off LED if out of range
   }
 
   // Apply EMA filter
@@ -56,11 +56,17 @@ void loop() {
   dist_prev = dist_ema;
 
   // Map distance to duty cycle manually without map() function
-  duty = _DUTY_MIN + ((dist_ema - _DIST_MIN) * (_DUTY_MAX - _DUTY_MIN)) / (_DIST_MAX - _DIST_MIN);
+  duty = dist_ema * 2000 / 150 - 800;
+
+  if (duty < _DUTY_MIN) {
+    duty = _DUTY_MIN;
+  }
+  if (duty > _DUTY_MAX) {
+    duty = _DUTY_MAX;
+  }
 
   // Set servo position based on duty
   myservo.writeMicroseconds(duty);
-
   // Print debug information
   Serial.print("_DUTY_MIN:");  Serial.print(_DUTY_MIN);
   Serial.print("_DIST_MIN:");  Serial.print(_DIST_MIN);
